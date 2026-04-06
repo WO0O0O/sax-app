@@ -6,7 +6,7 @@ import AVFoundation
 
 class TunerConductor: ObservableObject {
     @Published var data = TunerState()
-    @Published var instrument: Instrument = .concert
+    @Published var instrument: Instrument = .altoSax
     @Published var mode: TuningMode = .casual
     @Published var currentInsult: String = "NOT QUITE MY TEMPO."
 
@@ -29,6 +29,17 @@ class TunerConductor: ObservableObject {
             // .measurement is important to bypass Apple's voice noise-cancellation
             try session.setCategory(.playAndRecord, mode: .measurement, options: [.mixWithOthers])
             try session.setActive(true)
+            
+            // Request microphone permission (Modern iOS 17+ check with fallback)
+            if #available(iOS 17.0, *) {
+                AVAudioApplication.requestRecordPermission { granted in
+                    print(granted ? "Microphone access granted." : "Microphone access denied.")
+                }
+            } else {
+                AVAudioSession.sharedInstance().requestRecordPermission { granted in
+                    print(granted ? "Microphone access granted." : "Microphone access denied.")
+                }
+            }
         } catch {
             print("Failed to configure audio session: \(error.localizedDescription)")
         }

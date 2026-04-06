@@ -40,31 +40,56 @@ struct ContentView: View {
                                 .minimumScaleFactor(0.4)
                             
                             // Horizontal Sweeping Gauge
-                            ZStack(alignment: .center) {
-                                // Track line
-                                Rectangle()
-                                    .fill(cream.opacity(0.15))
-                                    .frame(width: geometry.size.width * 0.6, height: 6)
-                                
-                                let inTune = conductor.data.isInTune(for: conductor.mode)
-                                let gaugeColor = inTune ? inTuneCyan : outOfTuneOrange
-                                
-                                // Map cents (-50 to +50) to horizontal width dynamically based on iPad screen size
+                            VStack(spacing: 8) {
                                 let maxOffset = (geometry.size.width * 0.6) / 2.0
-                                let xOffset = CGFloat(max(min(conductor.data.cents, 50), -50)) * (maxOffset / 50.0)
+                                let toleranceWidth = (conductor.mode.tolerance / 50.0) * maxOffset * 2
                                 
-                                // Indicator block
-                                Rectangle()
-                                    .fill(gaugeColor)
-                                    .frame(width: inTune ? 40 : 20, height: inTune ? 24 : 12)
-                                    .offset(x: inTune ? 0 : xOffset) // Snaps dead center when perfectly in tune
-                                    .animation(.interactiveSpring(response: 0.15, dampingFraction: 0.8), value: xOffset)
-                                    .animation(.easeInOut(duration: 0.2), value: inTune)
+                                ZStack(alignment: .center) {
+                                    // Track background line
+                                    Rectangle()
+                                        .fill(cream.opacity(0.15))
+                                        .frame(width: geometry.size.width * 0.6, height: 6)
+                                    
+                                    // In-Tune Tolerance Zone Highlight
+                                    Rectangle()
+                                        .fill(inTuneCyan.opacity(0.15))
+                                        .frame(width: toleranceWidth, height: 32)
+                                    
+                                    // Ticks marks (every 10 cents = 5 steps each side)
+                                    ForEach(-5...5, id: \.self) { i in
+                                        let tickOffset = CGFloat(i) * (maxOffset / 5.0)
+                                        Rectangle()
+                                            .fill(cream.opacity(i == 0 ? 0.8 : 0.3))
+                                            .frame(width: i == 0 ? 4 : 2, height: i == 0 ? 32 : 16)
+                                            .offset(x: tickOffset)
+                                    }
+
+                                    let inTune = conductor.data.isInTune(for: conductor.mode)
+                                    let gaugeColor = inTune ? inTuneCyan : outOfTuneOrange
+                                    
+                                    // Map cents (-50 to +50) to horizontal width dynamically based on iPad screen size
+                                    let xOffset = CGFloat(max(min(conductor.data.cents, 50), -50)) * (maxOffset / 50.0)
+                                    
+                                    // Indicator block
+                                    Rectangle()
+                                        .fill(gaugeColor)
+                                        .frame(width: inTune ? 40 : 20, height: inTune ? 36 : 24)
+                                        .cornerRadius(4)
+                                        .offset(x: inTune ? 0 : xOffset) // Snaps dead center when perfectly in tune
+                                        .animation(.interactiveSpring(response: 0.15, dampingFraction: 0.8), value: xOffset)
+                                        .animation(.easeInOut(duration: 0.2), value: inTune)
+                                }
                                 
-                                // True Center line tick
-                                Rectangle()
-                                    .fill(cream.opacity(0.8))
-                                    .frame(width: 4, height: 32)
+                                // Labels
+                                HStack {
+                                    Text("-50").font(.system(size: 14, weight: .bold)).foregroundColor(cream.opacity(0.6))
+                                    Spacer()
+                                    Text("0").font(.system(size: 14, weight: .bold)).foregroundColor(cream.opacity(0.8))
+                                    Spacer()
+                                    Text("+50").font(.system(size: 14, weight: .bold)).foregroundColor(cream.opacity(0.6))
+                                }
+                                // Match the gauge width roughly
+                                .frame(width: geometry.size.width * 0.6 + 20)
                             }
                         }
                         // Visually center it higher up to offset the heavy footer mass
@@ -131,23 +156,58 @@ struct ContentView: View {
                                 .minimumScaleFactor(0.5)
                                 .frame(width: 200, alignment: .trailing)
                             
-                            ZStack(alignment: .leading) {
-                                Rectangle()
-                                    .fill(cream.opacity(0.2))
-                                    .frame(width: 8, height: 180)
-                                    .offset(x: 20)
-                                
-                                let inTune = conductor.data.isInTune(for: conductor.mode)
-                                let gaugeColor = inTune ? inTuneCyan : outOfTuneOrange
-                                
-                                let yOffset = CGFloat(max(min(conductor.data.cents, 50), -50)) * -1.6
-                                
-                                Rectangle()
-                                    .fill(gaugeColor)
-                                    .frame(width: inTune ? 40 : 20, height: inTune ? 16 : 8)
-                                    .offset(x: inTune ? 4 : 14, y: yOffset)
-                                    .animation(.interactiveSpring(response: 0.15, dampingFraction: 0.8), value: yOffset)
-                                    .animation(.easeInOut(duration: 0.2), value: inTune)
+                            HStack(spacing: 32) {
+                                // Vertical Track Container
+                                ZStack(alignment: .center) {
+                                    let maxOffset = 90.0 // half of 180 total height
+                                    let toleranceHeight = (conductor.mode.tolerance / 50.0) * maxOffset * 2
+                                    
+                                    // Track line
+                                    Rectangle()
+                                        .fill(cream.opacity(0.2))
+                                        .frame(width: 8, height: 180)
+                                    
+                                    // In-Tune Tolerance Zone Highlight
+                                    Rectangle()
+                                        .fill(inTuneCyan.opacity(0.15))
+                                        .frame(width: 32, height: toleranceHeight)
+                                    
+                                    // Ticks marks
+                                    ForEach(-5...5, id: \.self) { i in
+                                        let tickOffset = CGFloat(i) * (maxOffset / 5.0)
+                                        // Negative tickOffset because up is Sharp (+ cents)
+                                        Rectangle()
+                                            .fill(cream.opacity(i == 0 ? 0.8 : 0.3))
+                                            .frame(width: i == 0 ? 32 : 16, height: i == 0 ? 4 : 2)
+                                            .offset(y: -tickOffset)
+                                    }
+                                    
+                                    let inTune = conductor.data.isInTune(for: conductor.mode)
+                                    let gaugeColor = inTune ? inTuneCyan : outOfTuneOrange
+                                    
+                                    // Notice negative because visually sharp (+cents) is 'up' and flat is 'down'
+                                    let yOffset = CGFloat(max(min(conductor.data.cents, 50), -50)) * -1.8
+                                    
+                                    // Indicator block
+                                    Rectangle()
+                                        .fill(gaugeColor)
+                                        .frame(width: inTune ? 40 : 28, height: inTune ? 16 : 8)
+                                        .cornerRadius(2)
+                                        .offset(y: inTune ? 0 : yOffset)
+                                        .animation(.interactiveSpring(response: 0.15, dampingFraction: 0.8), value: yOffset)
+                                        .animation(.easeInOut(duration: 0.2), value: inTune)
+                                }
+                                .frame(height: 200)
+
+                                // Labels
+                                VStack {
+                                    Text("+50").font(.system(size: 14, weight: .bold)).foregroundColor(cream.opacity(0.6))
+                                    Spacer()
+                                    Text("0").font(.system(size: 14, weight: .bold)).foregroundColor(cream.opacity(0.8))
+                                    Spacer()
+                                    Text("-50").font(.system(size: 14, weight: .bold)).foregroundColor(cream.opacity(0.6))
+                                }
+                                .frame(height: 180 + 20)
                             }
                             .frame(height: 200)
                             
@@ -167,7 +227,7 @@ struct ContentView: View {
             }
         }
         .onAppear { conductor.start() }
-        .onChange(of: scenePhase) { newPhase in
+        .onChange(of: scenePhase) { oldPhase, newPhase in
             if newPhase == .active { conductor.start() }
             else if newPhase == .background || newPhase == .inactive { conductor.stop() }
         }
@@ -188,43 +248,54 @@ struct ContentView: View {
     
     @ViewBuilder
     private var controls: some View {
-        VStack(alignment: .trailing, spacing: 10) {
-            Menu {
-                Picker("Instrument", selection: $conductor.instrument) {
-                    ForEach(Instrument.allCases) { inst in
-                        Text(inst.rawValue).tag(inst)
+        VStack(alignment: .trailing, spacing: 16) {
+            // Instrument Row
+            HStack(spacing: 8) {
+                Text("INSTRUMENT")
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundColor(cream.opacity(0.4))
+                    .padding(.trailing, 4)
+                
+                ForEach(Instrument.allCases) { inst in
+                    pillButton(title: inst.rawValue, isSelected: conductor.instrument == inst) {
+                        conductor.instrument = inst
                     }
                 }
-            } label: {
-                HStack {
-                    Text(conductor.instrument.rawValue)
-                    Image(systemName: "chevron.down")
-                }
-                .font(.system(size: 14, weight: .bold))
-                .foregroundColor(navy)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(cream)
             }
-
-            Menu {
-                Picker("Mode", selection: $conductor.mode) {
-                    ForEach(TuningMode.allCases) { m in
-                        Text(m.rawValue).tag(m)
+            
+            // Mode Row
+            HStack(spacing: 8) {
+                Text("TOLERANCE")
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundColor(cream.opacity(0.4))
+                    .padding(.trailing, 4)
+                
+                ForEach(TuningMode.allCases) { m in
+                    pillButton(title: m.rawValue, isSelected: conductor.mode == m) {
+                        conductor.mode = m
                     }
                 }
-            } label: {
-                HStack {
-                    Text(conductor.mode.rawValue)
-                    Image(systemName: "chevron.down")
-                }
-                .font(.system(size: 14, weight: .bold))
-                .foregroundColor(navy)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(cream)
             }
         }
+    }
+    
+    @ViewBuilder
+    private func pillButton(title: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(title)
+                .font(.system(size: 14, weight: .black))
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(isSelected ? cream : Color.clear)
+                .foregroundColor(isSelected ? navy : cream)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 6)
+                        .stroke(cream, lineWidth: isSelected ? 0 : 2)
+                )
+                .cornerRadius(6)
+        }
+        .buttonStyle(PlainButtonStyle())
+        .animation(.spring(response: 0.2, dampingFraction: 0.7), value: isSelected)
     }
     
     @ViewBuilder
