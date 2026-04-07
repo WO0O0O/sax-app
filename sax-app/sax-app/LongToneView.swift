@@ -10,6 +10,8 @@ struct LongToneView: View {
     @State private var bestDuration: TimeInterval = 0.0
     @State private var failMessage: String = "PLAY A NOTE AND HOLD IT."
     
+    @State private var consecutiveFailures: Int = 0
+    
     let timer = Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()
     
     let navy = Color(red: 10/255.0, green: 17/255.0, blue: 40/255.0)
@@ -113,9 +115,10 @@ struct LongToneView: View {
         .onReceive(timer) { _ in
             guard conductor.data.isRecording else { return }
             
-            // Require a decent volume to count as "playing"
-            if conductor.data.amplitude > 0.05 && conductor.data.noteName != "--" {
+            // Require a slightly lower volume (0.03 vs 0.05) to help decay instruments like Piano
+            if conductor.data.amplitude > 0.03 && conductor.data.noteName != "--" {
                 if conductor.data.isInTune(for: settings.mode) {
+                    consecutiveFailures = 0 // Reset the grace period counter
                     currentDuration += 0.1
                     
                     if currentDuration > bestDuration {
@@ -125,18 +128,32 @@ struct LongToneView: View {
                         failMessage = currentDuration > 20 ? "DON'T YOU DARE STOP!" : "HOLD IT."
                     }
                 } else {
-                    // Blew the intonation
-                    if currentDuration > 0.5 {
-                        failMessage = "YOU DROPPED IT! PITCH WENT \(conductor.data.cents > 0 ? "SHARP" : "FLAT")."
+                    // Out of tune. Increment grace period counter to avoid instant micro-blip fails.
+                    consecutiveFailures += 1
+                    
+                    // If we hit 3 consecutive failures (0.3 seconds total of bad pitch), THEN it counts as a fail.
+                    if consecutiveFailures >= 3 {
+                        if currentDuration > 0.5 {
+                            failMessage = "YOU DROPPED IT! PITCH WENT \(conductor.data.cents > 0 ? "SHARP" : "FLAT")."
+                        }
+                        currentDuration = 0.0
+                        consecutiveFailures = 0
                     }
-                    currentDuration = 0.0
                 }
             } else {
-                // Stopped playing
-                if currentDuration > 0.5 {
-                    failMessage = "BREATH SUPPORT, NOT WISHFUL THINKING."
+                // Stopped playing or volume completely dropped.
+                // We also use the same grace period here so it doesn't instantly die for a microsecond drop in input
+                if currentDuration > 0 {
+                    consecutiveFailures += 1
                 }
-                currentDuration = 0.0
+                
+                if consecutiveFailures >= 3 {
+                    if currentDuration > 0.5 {
+                        failMessage = "BREATH SUPPORT, NOT WISHFUL THINKING."
+                    }
+                    currentDuration = 0.0
+                    consecutiveFailures = 0
+                }
             }
         }
     }
