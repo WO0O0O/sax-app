@@ -2,6 +2,11 @@
 
 All notable changes to the Blue Note Tuner project will be documented in this file.
 
+## [2026-04-07] Phase 12: Drone Pitch Generator
+- Built a vintage analog synth Drone Generator using SoundpipeAudioKit (`Oscillator` + `LowPassFilter`).
+- Transposition logic automatically converts the selected "Written" pitch to the correct "Sounding" concert pitch based on the global instrument setting.
+- Created `DroneView` featuring a massive, tactile interface and smooth oscillator ramping.
+
 ## [2026-04-07] Phase 11: Long Tone Endurance Test
 - Created `LongToneView` to track embouchure stamina and pitch stability.
 - Implemented an unforgiving 0.1s resolution timer that instantly resets upon intonation failure.

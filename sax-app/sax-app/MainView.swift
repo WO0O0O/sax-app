@@ -81,6 +81,8 @@ struct MainView: View {
                     ContentView()
                 case .endurance:
                     LongToneView()
+                case .drone:
+                    DroneView()
                 case .settings:
                     SettingsView()
                 case .none:
