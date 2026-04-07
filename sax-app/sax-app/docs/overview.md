@@ -32,7 +32,42 @@ This document outlines the project goals and our step-by-step implementation pla
 - **`TuningModels.swift`**: Expanded to include Tenor Sax and Trumpet transpositions.
 - **Design**: Generated premium Blue Note App Icon.
 
-### Phase 7: "Fletcher" Feedback Mode (Upcoming)
+### Phase 7: "Fletcher" Feedback Mode (Complete)
 - Implement a dynamic, text-based feedback system channeling Terence Fletcher from *Whiplash*.
 - When the pitch is imperfect, the app will deliver intense, sarcastic, and relentlessly strict feedback.
-- *(Note: Explicit swearing/severe abuse violates our safety guidelines, so the dialogue will focus on ruthless perfectionism, movie quotes like "Are you rushing or dragging?!", and demanding strictness without policy-violating curses.)*
+
+### Phase 8: UI Visualization Upgrade (Complete)
+- Added tick marks, +/- 50 labels, and a dedicated "In-Tune" tolerance zone to the gauge.
+- Redesigned the moving indicator.
+
+### Phase 9: Control Responsibility & Lifecycle (Complete)
+- Replaced the unresponsive Menu dropdowns with "Pill-style" segmented buttons.
+- Modernized iOS 17+ AVAudioApplication permissions and lifecycle management.
+
+### Phase 10: App Navigation & Architecture Restructuring (Upcoming)
+- Introduce a left-side Sidebar navigation (using `NavigationSplitView`) to manage multiple tools under one app, keeping the interface clean and professional.
+- Clean up the Start Page: Only the main "Tone Checker" and its Fletcher feedback remain.
+- Create a dedicated "Settings" Screen: Move the "Casual/Pro" difficulty and "Instrument" options (Alto, Tenor, Concert/Piano, Trumpet, etc.) off the main screen into here.
+
+### Phase 11: Long Tone Endurance Test (Upcoming)
+- A new dedicated screen for long tones.
+- Starts a timer when playing begins. Timer resets if pitch drifts outside of tolerance (set by Casual/Pro mode).
+- Visual "heat" or "pressure" bar to reward endurance.
+
+### Phase 12: Drone Pitch Generator (Upcoming)
+- A new screen for drone practice to develop your ear.
+- Uses AudioKit oscillator to play a continuous, vintage analog synth drone on a selected root note.
+
+### Phase 13: Unforgiving Metronome (Upcoming)
+- A beautifully designed metronome screen with Tap tempo, visual flash, and subdivisions.
+- Ties into the "Fletcher" theme: throws insults if you stop playing or drift off-tempo.
+
+### Phase 14: Intonation Tendency Analytics (Stats Page) (Upcoming)
+- A new "Stats" screen to view historical session data.
+- Tracks notes played and their average cents deviation to reveal your horn's quirks (e.g., sharp high C#).
+- Must include a manual "Start Tracking" / "Stop Tracking" button per session, so it doesn't accidentally log speech or background noise.
+
+### Phase 15: Sheet Music "Call & Response" Practice (Upcoming)
+- A new screen displaying a standard music staff (sheet music) instead of text note names.
+- The app visually prompts a note on the staff; you must sight-read it and play the pitch in-tune within a time limit.
+- Difficulty (speed of prompt, note range, transpositions) scales based on the Casual vs. Pro mode setting.

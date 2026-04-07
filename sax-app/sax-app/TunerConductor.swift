@@ -6,8 +6,6 @@ import AVFoundation
 
 class TunerConductor: ObservableObject {
     @Published var data = TunerState()
-    @Published var instrument: Instrument = .altoSax
-    @Published var mode: TuningMode = .casual
     @Published var currentInsult: String = "NOT QUITE MY TEMPO."
 
     let engine = AudioEngine()
@@ -15,6 +13,9 @@ class TunerConductor: ObservableObject {
     var tracker: PitchTap?
     // A silencer so we don't output the mic to the speakers, causing feedback
     var silence: Mixer?
+    
+    // Global Settings Dependency
+    weak var settings: AppSettings?
 
     let noteNamesWithSharps = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
 
@@ -58,7 +59,8 @@ class TunerConductor: ObservableObject {
         // YIN algorithm via PitchTap
         tracker = PitchTap(input) { [weak self] pitch, amp in
             DispatchQueue.main.async {
-                self?.update(pitch: pitch[0], amp: amp[0])
+                guard let self = self, let settings = self.settings else { return }
+                self.update(pitch: pitch[0], amp: amp[0], instrument: settings.instrument, mode: settings.mode)
             }
         }
     }
@@ -79,7 +81,7 @@ class TunerConductor: ObservableObject {
         data.isRecording = false
     }
 
-    private func update(pitch: AUValue, amp: AUValue) {
+    func update(pitch: AUValue, amp: AUValue, instrument: Instrument, mode: TuningMode) {
         // Volume gate: ignore ambient background noise if the amp is less than 0.05
         data.amplitude = amp
         guard amp > 0.05 else {

@@ -4,7 +4,7 @@ import SwiftUI
 struct Musicteach: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            MainView()
             // To ensure the dark theme works flawlessly across the system
             .preferredColorScheme(.dark)
         }

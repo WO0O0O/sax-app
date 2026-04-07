@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct ContentView: View {
+    @EnvironmentObject var settings: AppSettings
     @StateObject private var conductor = TunerConductor()
     @Environment(\.scenePhase) var scenePhase
 
@@ -20,11 +21,10 @@ struct ContentView: View {
                 if isLandscape {
                     // MARK: - Premium Landscape Sweeping Design
                     VStack(spacing: 0) {
-                        // Top Bar: Header & Controls
+                        // Top Bar: Header
                         HStack(alignment: .top) {
                             header
                             Spacer()
-                            controls
                         }
                         .padding(.horizontal, 40)
                         .padding(.top, 40)
@@ -42,7 +42,7 @@ struct ContentView: View {
                             // Horizontal Sweeping Gauge
                             VStack(spacing: 8) {
                                 let maxOffset = (geometry.size.width * 0.6) / 2.0
-                                let toleranceWidth = (conductor.mode.tolerance / 50.0) * maxOffset * 2
+                                let toleranceWidth = (settings.mode.tolerance / 50.0) * maxOffset * 2
                                 
                                 ZStack(alignment: .center) {
                                     // Track background line
@@ -64,7 +64,7 @@ struct ContentView: View {
                                             .offset(x: tickOffset)
                                     }
 
-                                    let inTune = conductor.data.isInTune(for: conductor.mode)
+                                    let inTune = conductor.data.isInTune(for: settings.mode)
                                     let gaugeColor = inTune ? inTuneCyan : outOfTuneOrange
                                     
                                     // Map cents (-50 to +50) to horizontal width dynamically based on iPad screen size
@@ -108,7 +108,7 @@ struct ContentView: View {
                             Text(conductor.currentInsult)
                                 .font(.system(size: 26, weight: .black, design: .default))
                                 .italic()
-                                .foregroundColor(conductor.data.isInTune(for: conductor.mode) ? inTuneCyan : outOfTuneOrange)
+                                .foregroundColor(conductor.data.isInTune(for: settings.mode) ? inTuneCyan : outOfTuneOrange)
                                 .multilineTextAlignment(.center)
                                 .rotationEffect(.degrees(-2))
                                 .frame(maxWidth: .infinity)
@@ -127,7 +127,6 @@ struct ContentView: View {
                         HStack(alignment: .top) {
                             header
                             Spacer()
-                            controls
                         }
                         .padding(.horizontal, 24)
                         .padding(.top, 20)
@@ -140,7 +139,7 @@ struct ContentView: View {
                             Text(conductor.currentInsult)
                                 .font(.system(size: 20, weight: .black, design: .default))
                                 .italic()
-                                .foregroundColor(conductor.data.isInTune(for: conductor.mode) ? inTuneCyan : outOfTuneOrange)
+                                .foregroundColor(conductor.data.isInTune(for: settings.mode) ? inTuneCyan : outOfTuneOrange)
                                 .multilineTextAlignment(.center)
                                 .rotationEffect(.degrees(-3))
                                 .padding(.horizontal, 20)
@@ -160,7 +159,7 @@ struct ContentView: View {
                                 // Vertical Track Container
                                 ZStack(alignment: .center) {
                                     let maxOffset = 90.0 // half of 180 total height
-                                    let toleranceHeight = (conductor.mode.tolerance / 50.0) * maxOffset * 2
+                                    let toleranceHeight = (settings.mode.tolerance / 50.0) * maxOffset * 2
                                     
                                     // Track line
                                     Rectangle()
@@ -182,7 +181,7 @@ struct ContentView: View {
                                             .offset(y: -tickOffset)
                                     }
                                     
-                                    let inTune = conductor.data.isInTune(for: conductor.mode)
+                                    let inTune = conductor.data.isInTune(for: settings.mode)
                                     let gaugeColor = inTune ? inTuneCyan : outOfTuneOrange
                                     
                                     // Notice negative because visually sharp (+cents) is 'up' and flat is 'down'
@@ -226,7 +225,10 @@ struct ContentView: View {
                 }
             }
         }
-        .onAppear { conductor.start() }
+        .onAppear {
+            conductor.settings = settings
+            conductor.start()
+        }
         .onChange(of: scenePhase) { oldPhase, newPhase in
             if newPhase == .active { conductor.start() }
             else if newPhase == .background || newPhase == .inactive { conductor.stop() }
@@ -247,62 +249,10 @@ struct ContentView: View {
     }
     
     @ViewBuilder
-    private var controls: some View {
-        VStack(alignment: .trailing, spacing: 16) {
-            // Instrument Row
-            HStack(spacing: 8) {
-                Text("INSTRUMENT")
-                    .font(.system(size: 10, weight: .bold))
-                    .foregroundColor(cream.opacity(0.4))
-                    .padding(.trailing, 4)
-                
-                ForEach(Instrument.allCases) { inst in
-                    pillButton(title: inst.rawValue, isSelected: conductor.instrument == inst) {
-                        conductor.instrument = inst
-                    }
-                }
-            }
-            
-            // Mode Row
-            HStack(spacing: 8) {
-                Text("TOLERANCE")
-                    .font(.system(size: 10, weight: .bold))
-                    .foregroundColor(cream.opacity(0.4))
-                    .padding(.trailing, 4)
-                
-                ForEach(TuningMode.allCases) { m in
-                    pillButton(title: m.rawValue, isSelected: conductor.mode == m) {
-                        conductor.mode = m
-                    }
-                }
-            }
-        }
-    }
-    
-    @ViewBuilder
-    private func pillButton(title: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Text(title)
-                .font(.system(size: 14, weight: .black))
-                .padding(.horizontal, 14)
-                .padding(.vertical, 8)
-                .background(isSelected ? cream : Color.clear)
-                .foregroundColor(isSelected ? navy : cream)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 6)
-                        .stroke(cream, lineWidth: isSelected ? 0 : 2)
-                )
-                .cornerRadius(6)
-        }
-        .buttonStyle(PlainButtonStyle())
-        .animation(.spring(response: 0.2, dampingFraction: 0.7), value: isSelected)
-    }
-    
-    @ViewBuilder
     private func footer(alignment: HorizontalAlignment) -> some View {
         VStack(alignment: alignment, spacing: 0) {
             let centsText = conductor.data.noteName == "--" ? "0.0" : String(format: "%.1f", conductor.data.cents)
-            let inTune = conductor.data.isInTune(for: conductor.mode)
+            let inTune = conductor.data.isInTune(for: settings.mode)
             
             Text("\(centsText) ¢")
                 .font(.system(size: 48, weight: .heavy, design: .default))
@@ -318,4 +268,5 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+        .environmentObject(AppSettings())
 }
