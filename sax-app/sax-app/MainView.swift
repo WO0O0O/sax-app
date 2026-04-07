@@ -85,26 +85,15 @@ struct MainView: View {
                     DroneView()
                 case .metronome:
                     MetronomeView()
+                case .stats:
+                    StatsView()
+                case .sheetMusic:
+                    SightReadingView()
                 case .settings:
                     SettingsView()
                 case .none:
                     Text("Select a tool from the menu")
                         .foregroundColor(cream)
-                default:
-                    // Placeholders for the upcoming tools
-                    ZStack {
-                        navy.ignoresSafeArea()
-                        VStack(spacing: 20) {
-                            Image(systemName: selectedScreen?.iconName ?? "")
-                                .font(.system(size: 60))
-                                .foregroundColor(cream.opacity(0.5))
-                            Text("\(selectedScreen?.rawValue ?? "") Workspace")
-                                .font(.system(size: 32, weight: .black))
-                                .foregroundColor(cream)
-                            Text("Coming in a future phase.")
-                                .foregroundColor(cream.opacity(0.7))
-                        }
-                    }
                 }
             }
             // Inject our global AppSettings down the hierarchy so Tuner and Settings can see it

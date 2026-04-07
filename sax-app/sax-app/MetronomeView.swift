@@ -3,6 +3,8 @@ import SwiftUI
 struct MetronomeView: View {
     @StateObject private var conductor = MetronomeConductor()
     @Environment(\.scenePhase) var scenePhase
+    @State private var showingBPMAlert = false
+    @State private var manualBPMString = ""
     
     let navy = Color(red: 10/255.0, green: 17/255.0, blue: 40/255.0)
     let cream = Color(red: 242/255.0, green: 239/255.0, blue: 233/255.0)
@@ -61,6 +63,25 @@ struct MetronomeView: View {
                         Text("BPM")
                             .font(.system(size: 24, weight: .heavy))
                             .foregroundColor(cream.opacity(0.6))
+                    }
+                    .onTapGesture {
+                        manualBPMString = "\(Int(conductor.bpm))"
+                        showingBPMAlert = true
+                    }
+                    .alert("Set BPM", isPresented: $showingBPMAlert) {
+                        TextField("BPM (40 - 300)", text: $manualBPMString)
+                            .keyboardType(.numberPad)
+                        Button("Cancel", role: .cancel) { }
+                        Button("Set") {
+                            if let newBPM = Double(manualBPMString), newBPM >= 40, newBPM <= 300 {
+                                conductor.bpm = newBPM
+                                // In MetronomeConductor, changing BPM automatically updates if currently playing 
+                                // (via property observer or manual trigger, actually we have a tight check here)
+                                if conductor.isPlaying { conductor.stop(); conductor.start() }
+                            }
+                        }
+                    } message: {
+                        Text("Enter a value between 40 and 300.")
                     }
                     
                     Button(action: {

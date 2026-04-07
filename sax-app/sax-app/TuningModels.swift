@@ -85,3 +85,25 @@ struct FletcherFeedback {
         }
     }
 }
+
+/// Stores statistics for a specific written pitch
+struct NoteStatistic: Codable, Identifiable, Equatable {
+    var id: String { noteName }
+    let noteName: String
+    var playCount: Int = 0
+    var averageCentsDeviation: Double = 0.0
+    
+    mutating func addReading(cents: Double) {
+        let totalDeviation = (averageCentsDeviation * Double(playCount)) + cents
+        playCount += 1
+        averageCentsDeviation = totalDeviation / Double(playCount)
+    }
+}
+
+/// Represents a note drawn on the staff for sight reading practice
+struct SightReadingPrompt: Equatable, Identifiable {
+    let id = UUID()
+    let writtenNoteName: String // e.g., "C", "G#"
+    let octave: Int // Typical alto sax range 4, 5, 6
+    let staffPosition: Int // Relative to middle C. C4 = 0, D4 = 1, E4 = 2, F4 = 3, etc. This is for drawing the note vertically on the staff.
+}

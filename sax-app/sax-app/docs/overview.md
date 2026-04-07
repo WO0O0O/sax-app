@@ -62,12 +62,12 @@ This document outlines the project goals and our step-by-step implementation pla
 - A beautifully designed metronome screen with Tap tempo, visual flash, and subdivisions.
 - Ties into the "Fletcher" theme: throws insults if you stop playing or drift off-tempo.
 
-### Phase 14: Intonation Tendency Analytics (Stats Page) (Upcoming)
-- A new "Stats" screen to view historical session data.
-- Tracks notes played and their average cents deviation to reveal your horn's quirks (e.g., sharp high C#).
-- Must include a manual "Start Tracking" / "Stop Tracking" button per session, so it doesn't accidentally log speech or background noise.
+### Phase 14: Intonation Tendency Analytics (Complete)
+- Professional dashboard featuring SwiftUI `Charts` for real-time visualization of pitch trends.
+- Active "Analytics Drill" mode with manual Start/Stop, session timer, and recording indicator.
+- Persistent data storage via `UserDefaults`.
 
-### Phase 15: Sheet Music "Call & Response" Practice (Upcoming)
-- A new screen displaying a standard music staff (sheet music) instead of text note names.
-- The app visually prompts a note on the staff; you must sight-read it and play the pitch in-tune within a time limit.
-- Difficulty (speed of prompt, note range, transpositions) scales based on the Casual vs. Pro mode setting.
+### Phase 15: Sheet Music "Call & Response" Practice (Complete)
+- Custom musical staff rendering engine with Treble Clef and Ledger lines.
+- 60-second gamified drill targeting notes tailored for the Alto Saxophone range.
+- High Score persistence and sensitivity optimization for piano (lower amp thresholds).
