@@ -2,6 +2,12 @@
 
 All notable changes to the Blue Note Tuner project will be documented in this file.
 
+## [2026-04-07] Phase 13: Unforgiving Metronome
+- Engineered a sample-accurate metronome utilizing `AVAudioEngine` and recursive buffer scheduling, guaranteeing zero audio jitter.
+- Synthesized unique "Tick" sounds for Downbeats (1500Hz) and Upbeats (800Hz) mathematically via `AVAudioPCMBuffer`.
+- Developed `MetronomeView` featuring Tap Tempo, animated BPM numbers, and synced screen flashes.
+- Implemented microphone tracking via `AVAudioMixerNode` to detect when the user stops playing, triggering Fletcher insults.
+
 ## [2026-04-07] Phase 12: Drone Pitch Generator
 - Built a vintage analog synth Drone Generator using SoundpipeAudioKit (`Oscillator` + `LowPassFilter`).
 - Transposition logic automatically converts the selected "Written" pitch to the correct "Sounding" concert pitch based on the global instrument setting.

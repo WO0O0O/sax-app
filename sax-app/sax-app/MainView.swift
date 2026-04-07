@@ -83,6 +83,8 @@ struct MainView: View {
                     LongToneView()
                 case .drone:
                     DroneView()
+                case .metronome:
+                    MetronomeView()
                 case .settings:
                     SettingsView()
                 case .none:
